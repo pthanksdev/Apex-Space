@@ -14,7 +14,8 @@ import {
   Chrome, 
   Github, 
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import { Alert, Snackbar } from '@mui/material';
 
@@ -53,8 +54,20 @@ export default function LoginPage() {
       handleFirebaseLogin(result.user);
     } catch (err: any) {
       console.error('OAuth error:', err);
-      // Fallback sandbox mode
-      if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-found' || err.message.includes('API key')) {
+      // Fallback sandbox mode for all configuration/provider issues
+      const isConfigError = 
+        err.code?.includes('api-key') || 
+        err.code?.includes('operation-not-allowed') || 
+        err.code?.includes('configuration-not-found') ||
+        err.code?.includes('invalid-api-key') ||
+        err.message?.includes('API key') ||
+        err.message?.includes('configuration') ||
+        err.message?.includes('operation-not-allowed') ||
+        err.message?.includes('disabled') ||
+        err.message?.includes('authDomain') ||
+        err.message?.includes('appId');
+
+      if (isConfigError) {
         // Trigger a premium fallback sandbox experience!
         const sandboxUser = {
           uid: 'sandbox-user-123',
@@ -83,7 +96,17 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error('Auth error:', err);
       // Fallback sandbox mode
-      if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-found' || err.message.includes('API key')) {
+      const isConfigError = 
+        err.code?.includes('api-key') || 
+        err.code?.includes('operation-not-allowed') || 
+        err.code?.includes('configuration-not-found') ||
+        err.code?.includes('invalid-api-key') ||
+        err.message?.includes('API key') ||
+        err.message?.includes('configuration') ||
+        err.message?.includes('operation-not-allowed') ||
+        err.message?.includes('disabled');
+
+      if (isConfigError) {
         const sandboxUser = {
           uid: 'sandbox-user-123',
           email: email,
@@ -159,6 +182,25 @@ export default function LoginPage() {
           >
             {loading ? 'Authenticating...' : 'Sign In'}
             <ArrowRight className="w-4 h-4" />
+          </button>
+
+          <button 
+            type="button"
+            disabled={loading}
+            onClick={() => {
+              const sandboxUser = {
+                uid: 'sandbox-user-123',
+                email: 'guest@apex.workspace',
+                displayName: 'Apex Guest Member',
+                photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80',
+              };
+              dispatch(setUser(sandboxUser));
+              router.push('/board');
+            }}
+            className="w-full py-3.5 bg-white/5 hover:bg-indigo-500/10 text-neutral-300 hover:text-indigo-400 font-extrabold rounded-2xl transition-all border border-white/5 hover:border-indigo-500/30 flex items-center justify-center gap-2 text-sm shadow-md"
+          >
+            <Sparkles className="w-4.5 h-4.5" />
+            Enter Sandbox Workspace (Demo)
           </button>
         </form>
 

@@ -62,8 +62,19 @@ export default function SignupPage() {
       setPendingUser(result.user);
       setStep('workspace');
     } catch (err: any) {
-      // Sandbox fallback
-      if (err.code?.includes('api-key') || err.message?.includes('API key') || err.code === 'auth/invalid-api-key') {
+      console.error('Email signup error:', err);
+      // Fallback sandbox mode for all configuration/provider issues
+      const isConfigError = 
+        err.code?.includes('api-key') || 
+        err.code?.includes('operation-not-allowed') || 
+        err.code?.includes('configuration-not-found') ||
+        err.code?.includes('invalid-api-key') ||
+        err.message?.includes('API key') ||
+        err.message?.includes('configuration') ||
+        err.message?.includes('operation-not-allowed') ||
+        err.message?.includes('disabled');
+
+      if (isConfigError) {
         const sandboxUser = { uid: `sandbox-${Date.now()}`, email, displayName: name, photoURL: null };
         setPendingUser(sandboxUser);
         setStep('workspace');
@@ -82,8 +93,19 @@ export default function SignupPage() {
       setPendingUser(result.user);
       setStep('workspace');
     } catch (err: any) {
+      console.error('OAuth signup error:', err);
       // Sandbox fallback
-      if (err.code?.includes('api-key') || err.message?.includes('API key') || err.code === 'auth/invalid-api-key') {
+      const isConfigError = 
+        err.code?.includes('api-key') || 
+        err.code?.includes('operation-not-allowed') || 
+        err.code?.includes('configuration-not-found') ||
+        err.code?.includes('invalid-api-key') ||
+        err.message?.includes('API key') ||
+        err.message?.includes('configuration') ||
+        err.message?.includes('operation-not-allowed') ||
+        err.message?.includes('disabled');
+
+      if (isConfigError) {
         const sandboxUser = { uid: `sandbox-${Date.now()}`, email: 'sandbox@apex.workspace', displayName: 'New Member', photoURL: null };
         setPendingUser(sandboxUser);
         setStep('workspace');
@@ -168,6 +190,16 @@ export default function SignupPage() {
                   className="w-full bg-gradient-to-br from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 text-sm disabled:opacity-50">
                   {loading ? 'Creating account...' : 'Continue'}
                   <ArrowRight className="w-4 h-4" />
+                </button>
+
+                <button type="button" disabled={loading}
+                  onClick={() => {
+                    const sandboxUser = { uid: `sandbox-${Date.now()}`, email: email || 'guest@apex.workspace', displayName: name || 'Apex Member', photoURL: null };
+                    setPendingUser(sandboxUser);
+                    setStep('workspace');
+                  }}
+                  className="w-full bg-white/5 hover:bg-indigo-500/10 hover:text-indigo-400 text-neutral-300 font-extrabold py-3.5 rounded-2xl transition-all border border-white/5 hover:border-indigo-500/30 flex items-center justify-center gap-2 text-sm shadow-md">
+                  <Sparkles className="w-4.5 h-4.5" /> Bypass with Sandbox Mode (Demo)
                 </button>
               </form>
 
