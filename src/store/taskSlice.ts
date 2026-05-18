@@ -21,6 +21,7 @@ export interface Task {
     uploadedAt: string;
   }[];
   createdAt: any;
+  reminderTime?: string | null;
 }
 
 export interface Activity {
