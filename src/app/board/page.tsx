@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
@@ -21,7 +21,7 @@ const COLUMNS = [
   { id: 'done',       label: 'Completed',   colorClass: 'border-t-emerald-500 bg-emerald-500/5' },
 ];
 
-export default function BoardPage() {
+function BoardPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
@@ -235,7 +235,7 @@ export default function BoardPage() {
         onPriorityChange={setPriority}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
         {COLUMNS.map(col => (
           <KanbanColumn
             key={col.id}
@@ -281,5 +281,17 @@ export default function BoardPage() {
         onClearTimer={clearTimerLocal}
       />
     </div>
+  );
+}
+
+export default function BoardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <BoardPageContent />
+    </Suspense>
   );
 }
