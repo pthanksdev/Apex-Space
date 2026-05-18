@@ -44,6 +44,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark bg-[#050505]">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://identitytoolkit.googleapis.com" />
+        <link rel="preconnect" href="https://securetoken.googleapis.com" />
+        <link rel="preconnect" href="https://firestore.googleapis.com" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+      </head>
       <body className={`${outfit.variable} font-sans antialiased text-white min-h-screen selection:bg-indigo-500/30 overflow-x-hidden`}>
         <Providers>
           <PWAInstaller />

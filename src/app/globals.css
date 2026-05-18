@@ -43,12 +43,16 @@ body {
 
 .glass-panel-hover {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform, border-color, background, box-shadow;
 }
 
 .glass-panel-hover:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(99, 102, 241, 0.25);
   box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.1);
+  transform: translate3d(0, -2px, 0);
 }
 
 /* Safe Area Padding for mobile screens / stand-alone PWA apps */
