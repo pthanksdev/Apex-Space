@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   title: "Apex Collaborative Workspace",
   description: "Real-time task management, team presence, and deadline tracking.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-192.png",
+    shortcut: "/icon-192.png",
+    apple: "/icon-512.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

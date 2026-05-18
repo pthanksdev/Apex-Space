@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task } from '@/store/taskSlice';
-import { X, CheckSquare, Plus, AlignLeft, Paperclip, Mic, MicOff, Volume2, VolumeX, Trash2, Loader2 } from 'lucide-react';
+import { X, CheckSquare, Plus, AlignLeft, Paperclip, Mic, MicOff, Volume2, VolumeX, Trash2, Loader2, Bell, AlertCircle, Calendar } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useSelector } from 'react-redux';
@@ -20,6 +20,9 @@ export default function TaskDetailsModal({ task, onClose, onUpdateTaskLocally }:
   const [newSubtask, setNewSubtask] = useState('');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [attachments, setAttachments] = useState<any[]>(task.attachments || []);
+  const [priority, setPriority] = useState(task.priority || 'medium');
+  const [dueDate, setDueDate] = useState(task.dueDate || '');
+  const [reminderTime, setReminderTime] = useState(task.reminderTime || '');
   const { user } = useSelector((s: RootState) => s.user);
 
   // Cloudinary Settings
@@ -59,8 +62,21 @@ export default function TaskDetailsModal({ task, onClose, onUpdateTaskLocally }:
     };
   }, []);
 
-  const handleSave = async (updatedAttachments = attachments) => {
-    const updatedTask = { ...task, description, subtasks, attachments: updatedAttachments };
+  const handleSave = async (
+    updatedAttachments = attachments,
+    newPriority = priority,
+    newDueDate = dueDate,
+    newReminder = reminderTime
+  ) => {
+    const updatedTask = {
+      ...task,
+      description,
+      subtasks,
+      attachments: updatedAttachments,
+      priority: newPriority,
+      dueDate: newDueDate || null,
+      reminderTime: newReminder || null
+    };
     onUpdateTaskLocally(updatedTask);
     
     // Sync to Firestore
@@ -69,7 +85,10 @@ export default function TaskDetailsModal({ task, onClose, onUpdateTaskLocally }:
         await updateDoc(doc(db, 'tasks', task.id), {
           description,
           subtasks,
-          attachments: updatedAttachments
+          attachments: updatedAttachments,
+          priority: newPriority,
+          dueDate: newDueDate || null,
+          reminderTime: newReminder || null
         });
       }
     } catch (e) {
@@ -313,6 +332,77 @@ export default function TaskDetailsModal({ task, onClose, onUpdateTaskLocally }:
                   isListeningDesc ? 'border-red-500/30' : 'border-white/5'
                 }`}
               />
+            </div>
+
+            {/* Metadata Selection Grid (Responsive, stacks on mobile, 3 columns on iPad/Desktop) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-white/5 pt-6">
+              {/* Priority */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-neutral-400 font-bold uppercase tracking-widest text-[10px]">
+                  <AlertCircle className="w-3.5 h-3.5 text-indigo-400" /> Priority
+                </label>
+                <select
+                  value={priority}
+                  onChange={(e) => {
+                    const val = e.target.value as any;
+                    setPriority(val);
+                    handleSave(attachments, val, dueDate, reminderTime);
+                  }}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-semibold text-neutral-200 focus:outline-none focus:border-indigo-500/50"
+                >
+                  <option value="low" className="bg-neutral-900 text-neutral-200">Low</option>
+                  <option value="medium" className="bg-neutral-900 text-neutral-200">Medium</option>
+                  <option value="high" className="bg-neutral-900 text-neutral-200">High</option>
+                  <option value="critical" className="bg-neutral-900 text-neutral-200">Critical</option>
+                </select>
+              </div>
+
+              {/* Due Date */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-neutral-400 font-bold uppercase tracking-widest text-[10px]">
+                  <Calendar className="w-3.5 h-3.5 text-indigo-400" /> Due Date
+                </label>
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setDueDate(val);
+                    handleSave(attachments, priority, val, reminderTime);
+                  }}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-200 focus:outline-none focus:border-indigo-500/50 min-h-[38px]"
+                />
+              </div>
+
+              {/* Reminder Alarm */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-neutral-400 font-bold uppercase tracking-widest text-[10px]">
+                  <Bell className="w-3.5 h-3.5 text-indigo-400" /> Set Reminder
+                </label>
+                <div className="relative">
+                  <input
+                    type="datetime-local"
+                    value={reminderTime}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setReminderTime(val);
+                      handleSave(attachments, priority, dueDate, val);
+                    }}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-3 pr-10 py-2 text-xs font-semibold text-neutral-200 focus:outline-none focus:border-indigo-500/50 min-h-[38px]"
+                  />
+                  {reminderTime && (
+                    <button
+                      onClick={() => {
+                        setReminderTime('');
+                        handleSave(attachments, priority, dueDate, '');
+                      }}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-red-400 text-[10px] font-extrabold uppercase hover:bg-white/5 px-1.5 py-0.5 rounded transition-all"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Subtasks (Checklist) */}
